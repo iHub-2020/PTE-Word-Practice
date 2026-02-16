@@ -1,0 +1,7 @@
+Flask==2.3.3
+Flask-CORS==4.0.0
+Flask-SQLAlchemy==3.0.5
+gTTS==2.3.2
+gunicorn==21.2.0
+gevent==23.9.1
+reportlab==4.0.9

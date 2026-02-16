@@ -1,0 +1,72 @@
+# Git
+.git
+.gitignore
+
+# Node.js
+node_modules
+frontend/node_modules
+npm-debug.log
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info
+.eggs
+build
+dist
+
+# Virtual environments
+.venv
+venv
+ENV
+env
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Logs and temp
+logs
+*.log
+*.tmp
+*.temp
+
+# Uploads and exports (keep .gitkeep)
+uploads/*
+exports/*
+static/audio/*
+data/*
+!uploads/.gitkeep
+!exports/.gitkeep
+!static/audio/.gitkeep
+!data/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+coverage.xml
+
+# Docker
+docker-compose*.yml
+Dockerfile~
+
+# Agent artifacts & zombie files
+memory/
+docs/
+.agent/
+UI_Demo.html
+*.test.py
+*_debug.py
+*_test.py

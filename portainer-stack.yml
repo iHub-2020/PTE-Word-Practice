@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  pte-nexus:
+    image: pte-nexus:latest
+    container_name: pte-nexus
+    hostname: pte-nexus
+    ports:
+      - "8300:5000"        # HTTP 访问端口
+      # - "8443:5000"      # HTTPS 端口（需配合反向代理 / Nginx Proxy Manager）
+    volumes:
+      # 数据持久化
+      - /opt/pte-nexus/data:/app/data
+      - /opt/pte-nexus/static/audio:/app/static/audio
+      - /opt/pte-nexus/uploads:/app/uploads
+      - /opt/pte-nexus/uploads/music:/app/uploads/music
+      - /opt/pte-nexus/exports:/app/exports
+      - /opt/pte-nexus/logs:/app/logs
+      # - /opt/pte-nexus/frontend/dist:/app/frontend/dist
+      # SSL 证书挂载（可选，配合 Nginx 反向代理使用）
+      # - /opt/ssl/certs/fullchain.pem:/etc/ssl/certs/fullchain.pem:ro
+      # - /opt/ssl/private/privkey.pem:/etc/ssl/private/privkey.pem:ro
+    environment:
+      - SECRET_KEY=your-secret-key-here-change-in-production
+      - FLASK_ENV=production
+      - LOG_LEVEL=INFO
+      - DATABASE_URL=sqlite:////app/data/words.db
+      - TZ=Asia/Shanghai
+      # 代理配置（gTTS 访问 Google Translate API 时使用）
+      # 取消注释以下行并替换为你的代理端口
+      # - HTTP_PROXY=http://host.docker.internal:7890
+      # - HTTPS_PROXY=http://host.docker.internal:7890
+      - NO_PROXY=localhost,127.0.0.1,host.docker.internal
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    networks:
+      - proxy-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # 资源限制
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+
+networks:
+  proxy-network:
+    external: true
