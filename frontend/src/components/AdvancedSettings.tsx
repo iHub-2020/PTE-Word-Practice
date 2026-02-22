@@ -1,10 +1,38 @@
 import { useAppStore } from '../store/appStore';
 import { Settings, RotateCcw, X, Trash2 } from 'lucide-react';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { showToast } from '../lib/utils';
 
 interface AdvancedSettingsProps {
   onClose?: () => void;
+}
+
+/**
+ * 平滑滑块 Hook：拖拽过程中使用本地 state，
+ * 松手后才提交到 Zustand store，避免高频 re-render 导致卡顿。
+ */
+function useSmoothSlider(storeValue: number, onCommit: (v: number) => void) {
+  const [localValue, setLocalValue] = useState(storeValue);
+  const isDragging = useRef(false);
+
+  // 当外部 store 值改变时（如重置），同步本地值
+  useEffect(() => {
+    if (!isDragging.current) {
+      setLocalValue(storeValue);
+    }
+  }, [storeValue]);
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    isDragging.current = true;
+    setLocalValue(parseFloat(e.target.value));
+  }, []);
+
+  const handleCommit = useCallback(() => {
+    isDragging.current = false;
+    onCommit(localValue);
+  }, [localValue, onCommit]);
+
+  return { localValue, handleChange, handleCommit };
 }
 
 export default function AdvancedSettings({ onClose }: AdvancedSettingsProps) {
@@ -61,6 +89,34 @@ export default function AdvancedSettings({ onClose }: AdvancedSettingsProps) {
     });
   };
 
+  // --- 平滑滑块 ---
+  const wordRepeatSlider = useSmoothSlider(
+    playbackConfig.enableWordRepeat ? playbackConfig.wordRepeat : 1,
+    useCallback((v: number) => updateConfig({ wordRepeat: v, enableWordRepeat: v > 1 }), [updateConfig])
+  );
+
+  const listLoopsSlider = useSmoothSlider(
+    playbackConfig.enableListLoop ? playbackConfig.listLoops : 1,
+    useCallback((v: number) => updateConfig({ listLoops: v, enableListLoop: v > 1 }), [updateConfig])
+  );
+
+  const playIntervalSlider = useSmoothSlider(
+    playbackConfig.playInterval,
+    useCallback((v: number) => updateConfig({ playInterval: v }), [updateConfig])
+  );
+
+  const spellDelaySlider = useSmoothSlider(
+    playbackConfig.spellDelay,
+    useCallback((v: number) => updateConfig({ spellDelay: v }), [updateConfig])
+  );
+
+  const meaningDelaySlider = useSmoothSlider(
+    playbackConfig.meaningDelay,
+    useCallback((v: number) => updateConfig({ meaningDelay: v }), [updateConfig])
+  );
+
+  const sliderClass = "flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider-smooth";
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
 
@@ -102,7 +158,7 @@ export default function AdvancedSettings({ onClose }: AdvancedSettingsProps) {
                 单词重复次数
               </label>
               <span className="text-sm font-bold text-primary">
-                {playbackConfig.enableWordRepeat ? playbackConfig.wordRepeat : 1} 次
+                {wordRepeatSlider.localValue} 次
               </span>
             </div>
             <div className="flex items-center gap-3">
@@ -111,18 +167,14 @@ export default function AdvancedSettings({ onClose }: AdvancedSettingsProps) {
                 min="1"
                 max="10"
                 step="1"
-                value={playbackConfig.enableWordRepeat ? playbackConfig.wordRepeat : 1}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value);
-                  updateConfig({
-                    wordRepeat: value,
-                    enableWordRepeat: value > 1
-                  });
-                }}
-                className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary"
+                value={wordRepeatSlider.localValue}
+                onChange={wordRepeatSlider.handleChange}
+                onMouseUp={wordRepeatSlider.handleCommit}
+                onTouchEnd={wordRepeatSlider.handleCommit}
+                className={sliderClass}
               />
               <span className="text-xs text-gray-400 w-16 text-right">
-                {playbackConfig.enableWordRepeat ? `${playbackConfig.wordRepeat}次` : '关闭'}
+                {wordRepeatSlider.localValue > 1 ? `${wordRepeatSlider.localValue}次` : '关闭'}
               </span>
             </div>
           </div>
@@ -134,7 +186,7 @@ export default function AdvancedSettings({ onClose }: AdvancedSettingsProps) {
                 列表循环次数
               </label>
               <span className="text-sm font-bold text-primary">
-                {playbackConfig.enableListLoop ? playbackConfig.listLoops : 1} 次
+                {listLoopsSlider.localValue} 次
               </span>
             </div>
             <div className="flex items-center gap-3">
@@ -143,18 +195,14 @@ export default function AdvancedSettings({ onClose }: AdvancedSettingsProps) {
                 min="1"
                 max="10"
                 step="1"
-                value={playbackConfig.enableListLoop ? playbackConfig.listLoops : 1}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value);
-                  updateConfig({
-                    listLoops: value,
-                    enableListLoop: value > 1
-                  });
-                }}
-                className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary"
+                value={listLoopsSlider.localValue}
+                onChange={listLoopsSlider.handleChange}
+                onMouseUp={listLoopsSlider.handleCommit}
+                onTouchEnd={listLoopsSlider.handleCommit}
+                className={sliderClass}
               />
               <span className="text-xs text-gray-400 w-16 text-right">
-                {playbackConfig.enableListLoop ? `${playbackConfig.listLoops}次` : '关闭'}
+                {listLoopsSlider.localValue > 1 ? `${listLoopsSlider.localValue}次` : '关闭'}
               </span>
             </div>
           </div>
@@ -166,7 +214,7 @@ export default function AdvancedSettings({ onClose }: AdvancedSettingsProps) {
                 单词切换间隔
               </label>
               <span className="text-sm font-bold text-primary">
-                {playbackConfig.playInterval.toFixed(1)} 秒
+                {playIntervalSlider.localValue.toFixed(1)} 秒
               </span>
             </div>
             <div className="flex items-center gap-3">
@@ -175,12 +223,14 @@ export default function AdvancedSettings({ onClose }: AdvancedSettingsProps) {
                 min="0"
                 max="10"
                 step="0.5"
-                value={playbackConfig.playInterval}
-                onChange={(e) => updateConfig({ playInterval: parseFloat(e.target.value) })}
-                className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary"
+                value={playIntervalSlider.localValue}
+                onChange={playIntervalSlider.handleChange}
+                onMouseUp={playIntervalSlider.handleCommit}
+                onTouchEnd={playIntervalSlider.handleCommit}
+                className={sliderClass}
               />
               <span className="text-xs text-gray-400 w-16 text-right">
-                {playbackConfig.playInterval}s
+                {playIntervalSlider.localValue}s
               </span>
             </div>
           </div>
@@ -192,7 +242,7 @@ export default function AdvancedSettings({ onClose }: AdvancedSettingsProps) {
                 拼读字母间隔
               </label>
               <span className="text-sm font-bold text-primary">
-                {playbackConfig.spellDelay.toFixed(1)} 秒
+                {spellDelaySlider.localValue.toFixed(1)} 秒
               </span>
             </div>
             <div className="flex items-center gap-3">
@@ -201,12 +251,14 @@ export default function AdvancedSettings({ onClose }: AdvancedSettingsProps) {
                 min="0.1"
                 max="2"
                 step="0.1"
-                value={playbackConfig.spellDelay}
-                onChange={(e) => updateConfig({ spellDelay: parseFloat(e.target.value) })}
-                className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary"
+                value={spellDelaySlider.localValue}
+                onChange={spellDelaySlider.handleChange}
+                onMouseUp={spellDelaySlider.handleCommit}
+                onTouchEnd={spellDelaySlider.handleCommit}
+                className={sliderClass}
               />
               <span className="text-xs text-gray-400 w-16 text-right">
-                {playbackConfig.spellDelay}s
+                {spellDelaySlider.localValue}s
               </span>
             </div>
           </div>
@@ -218,7 +270,7 @@ export default function AdvancedSettings({ onClose }: AdvancedSettingsProps) {
                 含义切换间隔
               </label>
               <span className="text-sm font-bold text-primary">
-                {playbackConfig.meaningDelay.toFixed(1)} 秒
+                {meaningDelaySlider.localValue.toFixed(1)} 秒
               </span>
             </div>
             <div className="flex items-center gap-3">
@@ -227,12 +279,14 @@ export default function AdvancedSettings({ onClose }: AdvancedSettingsProps) {
                 min="0"
                 max="5"
                 step="0.5"
-                value={playbackConfig.meaningDelay}
-                onChange={(e) => updateConfig({ meaningDelay: parseFloat(e.target.value) })}
-                className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary"
+                value={meaningDelaySlider.localValue}
+                onChange={meaningDelaySlider.handleChange}
+                onMouseUp={meaningDelaySlider.handleCommit}
+                onTouchEnd={meaningDelaySlider.handleCommit}
+                className={sliderClass}
               />
               <span className="text-xs text-gray-400 w-16 text-right">
-                {playbackConfig.meaningDelay}s
+                {meaningDelaySlider.localValue}s
               </span>
             </div>
           </div>

@@ -43,6 +43,31 @@ export default function MusicPlayer() {
   const [customTracks, setCustomTracks] = useState<MusicTrack[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // 平滑音量滑块：拖拽中使用本地 state，松手后才提交
+  const [localVolume, setLocalVolume] = useState(musicVolume);
+  const isDraggingVolume = useRef(false);
+
+  useEffect(() => {
+    if (!isDraggingVolume.current) {
+      setLocalVolume(musicVolume);
+    }
+  }, [musicVolume]);
+
+  const handleVolumeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    isDraggingVolume.current = true;
+    const v = parseFloat(e.target.value);
+    setLocalVolume(v);
+    // 实时更新音频音量以获得即时反馈
+    if (audioRef.current) {
+      audioRef.current.volume = v;
+    }
+  }, []);
+
+  const handleVolumeCommit = useCallback(() => {
+    isDraggingVolume.current = false;
+    setMusicVolume(localVolume);
+  }, [localVolume, setMusicVolume]);
+
   const tracks = useMemo(() => {
     if (currentMusicCategory === 'jazz') {
       return [...JAZZ_TRACKS, ...customTracks];
@@ -377,8 +402,11 @@ export default function MusicPlayer() {
       <div className="p-4 border-t border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-2 mb-3">
           <Volume2 className="h-4 w-4 text-gray-400" />
-          <input type="range" min="0" max="1" step="0.1" value={musicVolume} onChange={(e) => setMusicVolume(parseFloat(e.target.value))}
-            className="flex-1 h-1 bg-gray-200 dark:bg-gray-700 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:rounded-full" />
+          <input type="range" min="0" max="1" step="0.01" value={localVolume}
+            onChange={handleVolumeChange}
+            onMouseUp={handleVolumeCommit}
+            onTouchEnd={handleVolumeCommit}
+            className="flex-1 h-1 bg-gray-200 dark:bg-gray-700 rounded-full appearance-none cursor-pointer slider-smooth" />
         </div>
         <div className="flex items-center justify-center gap-3">
           <button onClick={toggleMusicLoop} className={`p-1.5 rounded-lg transition-colors ${musicLoop ? 'text-primary' : 'text-gray-400 hover:text-gray-600'}`} title="循环播放"><Repeat className="h-4 w-4" /></button>

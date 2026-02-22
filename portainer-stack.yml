@@ -1,22 +1,22 @@
 version: '3.8'
 
 services:
-  pte-nexus:
-    image: pte-nexus:latest
-    container_name: pte-nexus
-    hostname: pte-nexus
+  pte-word-practice:
+    image: pte-word-practice:latest
+    container_name: pte-word-practice
+    hostname: pte-word-practice
     ports:
       - "8300:5000"        # HTTP 访问端口
       # - "8443:5000"      # HTTPS 端口（需配合反向代理 / Nginx Proxy Manager）
     volumes:
       # 数据持久化
-      - /opt/pte-nexus/data:/app/data
-      - /opt/pte-nexus/static/audio:/app/static/audio
-      - /opt/pte-nexus/uploads:/app/uploads
-      - /opt/pte-nexus/uploads/music:/app/uploads/music
-      - /opt/pte-nexus/exports:/app/exports
-      - /opt/pte-nexus/logs:/app/logs
-      # - /opt/pte-nexus/frontend/dist:/app/frontend/dist
+      - /opt/pte-word-practice/data:/app/data
+      - /opt/pte-word-practice/static/audio:/app/static/audio
+      - /opt/pte-word-practice/uploads:/app/uploads
+      - /opt/pte-word-practice/uploads/music:/app/uploads/music
+      - /opt/pte-word-practice/exports:/app/exports
+      - /opt/pte-word-practice/logs:/app/logs
+      # - /opt/pte-word-practice/frontend/dist:/app/frontend/dist
       # SSL 证书挂载（可选，配合 Nginx 反向代理使用）
       # - /opt/ssl/certs/fullchain.pem:/etc/ssl/certs/fullchain.pem:ro
       # - /opt/ssl/private/privkey.pem:/etc/ssl/private/privkey.pem:ro

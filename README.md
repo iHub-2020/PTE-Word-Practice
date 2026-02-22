@@ -1,4 +1,4 @@
-# Word Practice App 📚
+# PTE Word Practice 📚
 
 一站式英语/中文单词学习与练习应用，支持发音朗读、拼读模式、含义 TTS、背景音乐、移动端适配等功能。
 
@@ -68,22 +68,40 @@ CSV 文件需包含以下列（忽略大小写）：
 ### 构建镜像
 
 ```bash
-git clone <repository-url>
-cd word-practice-app
-docker build -t word-practice-app:latest .
+git clone https://github.com/iHub-2020/PTE-Word-Practice.git
+cd PTE-Word-Practice
+docker build -t pte-word-practice:latest .
+```
+
+### 创建持久化目录
+
+部署前需要在宿主机上创建数据持久化目录，并设置正确的权限（容器内以 UID 1000 运行）：
+
+```bash
+# 创建所有持久化目录
+sudo mkdir -p /opt/pte-word-practice/{data,static/audio,uploads/music,exports,logs}
+
+# 设置目录所有者为 UID 1000（与容器内用户一致）
+sudo chown -R 1000:1000 /opt/pte-word-practice
+
+# 设置目录权限为 775（所有者和组可读写执行，其他人可读可执行）
+sudo chmod -R 775 /opt/pte-word-practice
 ```
 
 ### 快速启动
 
 ```bash
 docker run -d \
-  --name word-practice-app \
+  --name pte-word-practice \
   -p 8300:5000 \
-  -v /opt/word-practice-app/data:/app/data \
-  -v /opt/word-practice-app/uploads:/app/uploads \
-  -v /opt/word-practice-app/static/audio:/app/static/audio \
+  -v /opt/pte-word-practice/data:/app/data \
+  -v /opt/pte-word-practice/static/audio:/app/static/audio \
+  -v /opt/pte-word-practice/uploads:/app/uploads \
+  -v /opt/pte-word-practice/uploads/music:/app/uploads/music \
+  -v /opt/pte-word-practice/exports:/app/exports \
+  -v /opt/pte-word-practice/logs:/app/logs \
   -e TZ=Asia/Shanghai \
-  word-practice-app:latest
+  pte-word-practice:latest
 ```
 
 ### Portainer Stack 部署
@@ -118,7 +136,7 @@ docker run -d \
 ## 📁 目录结构
 
 ```
-word-practice-app/
+PTE-Word-Practice/
 ├── app.py                 # Flask 应用入口
 ├── config.py              # 应用配置
 ├── models.py              # 数据模型 (Word)
