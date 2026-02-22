@@ -41,11 +41,11 @@ logs
 # Uploads and exports (keep .gitkeep)
 uploads/*
 exports/*
-static/audio/*
+cache/*
 data/*
 !uploads/.gitkeep
 !exports/.gitkeep
-!static/audio/.gitkeep
+!cache/.gitkeep
 !data/.gitkeep
 
 # OS

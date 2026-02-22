@@ -149,6 +149,14 @@ export default function MusicPlayer() {
     }
   }, [musicLoop]);
 
+  // 关闭背景音乐时暂停音频
+  useEffect(() => {
+    if (!musicEnabled && audioRef.current) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
+  }, [musicEnabled]);
+
   // 组件挂载时从服务器加载已上传的音乐列表
   useEffect(() => {
     const fetchMusicList = async () => {

@@ -146,7 +146,7 @@ function App() {
         {/* Footer */}
         <footer className="border-t border-gray-200 dark:border-gray-700 mt-8 py-4">
           <div className="container mx-auto px-4 text-center text-sm text-gray-500 dark:text-gray-400">
-            <p>Word Practice App - 学习英语/中文单词的利器</p>
+            <p>PTE Word Practice - 学习英语/中文单词的利器</p>
           </div>
         </footer>
       </div>

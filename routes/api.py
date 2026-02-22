@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, send_file
 from services.word_service import WordService
 from services.audio_service import AudioService
 from services.export_service import ExportService
+from config import UPLOAD_FOLDER
 import os
 import logging
 
@@ -299,7 +300,7 @@ def import_words():
         if not allowed_file(file.filename):
             return jsonify({'success': False, 'error': '只支持CSV和JSON格式'}), 400
         
-        import_path = os.path.join('uploads', file.filename)
+        import_path = os.path.join(UPLOAD_FOLDER, file.filename)
         file.save(import_path)
         
         result = word_service.import_from_file(import_path)

@@ -11,7 +11,7 @@ services:
     volumes:
       # 数据持久化
       - /opt/pte-word-practice/data:/app/data
-      - /opt/pte-word-practice/static/audio:/app/static/audio
+      - /opt/pte-word-practice/cache:/app/cache
       - /opt/pte-word-practice/uploads:/app/uploads
       - /opt/pte-word-practice/uploads/music:/app/uploads/music
       - /opt/pte-word-practice/exports:/app/exports

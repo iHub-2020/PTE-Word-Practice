@@ -46,7 +46,7 @@ COPY --from=frontend-builder --chown=1000:1000 /app/frontend/dist ./frontend/dis
 
 # 创建非 root 用户并设置权限
 RUN useradd -m -u 1000 reyan && \
-    mkdir -p /app/data /app/static/audio /app/uploads/music /app/exports /app/logs && \
+    mkdir -p /app/data /app/cache /app/uploads/music /app/exports /app/logs && \
     chown -R reyan:reyan /app
 
 USER reyan

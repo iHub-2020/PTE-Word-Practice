@@ -95,7 +95,7 @@ def create_app():
     @app.route('/<path:path>')
     def serve_react_app(path):
         # 检查是否是API请求
-        if path.startswith('api/') or path.startswith('static/') or path.startswith('audio/'):
+        if path.startswith('api/') or path.startswith('static/') or path.startswith('cache/'):
             return jsonify({'error': '页面未找到'}), 404
         
         # 检查静态文件是否存在
@@ -108,7 +108,7 @@ def create_app():
         except Exception:
             return render_template('index.html')
 
-    @app.route('/audio/<path:filename>')
+    @app.route('/cache/<path:filename>')
     def audio_files(filename):
         return send_from_directory(AUDIO_FOLDER, filename)
 
@@ -125,11 +125,14 @@ def create_app():
     # 请求日志
     @app.before_request
     def log_request():
-        logger.info(f"请求: {request.method} {request.url}")
+        # 跳过静态资源和健康检查的日志
+        if not request.path.startswith(('/assets/', '/static/', '/health')):
+            logger.info(f"请求: {request.method} {request.url}")
 
     @app.after_request
     def log_response(response):
-        logger.info(f"响应: {response.status_code}")
+        if not request.path.startswith(('/assets/', '/static/', '/health')):
+            logger.info(f"响应: {response.status_code}")
         return response
 
     # 创建数据库表

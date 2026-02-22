@@ -17,7 +17,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 # File Paths
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
 EXPORT_FOLDER = os.path.join(BASE_DIR, 'exports')
-AUDIO_FOLDER = os.path.join(BASE_DIR, 'static', 'audio')
+AUDIO_FOLDER = os.path.join(BASE_DIR, 'cache')
 DATA_FOLDER = os.path.join(BASE_DIR, 'data')
 
 # File Upload Settings

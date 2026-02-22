@@ -1,182 +1,124 @@
-# PTE Word Practice 📚
+# PTE Word Practice
 
-一站式英语/中文单词学习与练习应用，支持发音朗读、拼读模式、含义 TTS、背景音乐、移动端适配等功能。
+**PTE 单词练习工具** — 支持英语/中文单词的自动播放、拼读、含义朗读和背景音乐。
 
-## ✨ 功能特性
+## 🎯 功能特性
 
-- **智能播放** — 发音 → 拼读 → 含义朗读，支持单词重复 × N 次
-- **连续播放** — 自动循环播放整个列表，支持列表循环
-- **拼读模式** — 逐字母拼读单词（含可配置字母间隔）
-- **含义朗读** — TTS 自动朗读中文释义，包含词性（及物动词、名词等）
-- **高级设置** — 单词重复次数、列表循环、播放间隔、拼读间隔、含义延迟
-- **暗黑模式** — 完整的深色主题支持
-- **背景音乐** — 内置 Jazz/Morning 音乐 + 自定义上传
-- **手动添加** — 在线添加单词（支持 EN/ZH + 音标）
-- **CSV 导入/导出** — 批量导入导出词库
-- **移动端适配** — 响应式布局 + Wake Lock 防息屏
-- **Docker 部署** — 一键 Docker 构建与 Portainer Stack 部署
-
-## 🛠 技术栈
-
-| 层级 | 技术 |
+| 功能 | 说明 |
 |------|------|
-| 前端 | React 18 + TypeScript + Vite + Tailwind CSS |
-| 状态 | Zustand |
-| 后端 | Flask + Flask-SQLAlchemy + Gunicorn |
-| 数据库 | SQLite |
-| TTS | gTTS (Google Text-to-Speech) |
-| 部署 | Docker 多阶段构建 |
+| 📖 单词管理 | 添加、编辑、删除、批量导入（CSV）、导出 |
+| 🔊 自动播放 | 单词发音 → 字母拼读 → 中文含义，支持循环与随机模式 |
+| ⚙️ 播放配置 | 单词重复次数、列表循环、播放间隔、拼读延迟、含义延迟 |
+| 🎵 背景音乐 | 上传自定义音乐文件，支持循环播放和自动播放下一首 |
+| 🗂️ 音频缓存 | TTS 音频自动缓存至 `cache/`，可查看缓存大小并一键清空 |
+| 🌓 深色模式 | 一键切换明暗主题 |
+| 📊 学习统计 | 单词总数、已复习数、复习率 |
 
-## 📥 CSV 导入（来源：欧易词典）
+## 🛠️ 技术栈
 
-本应用的 CSV 词库文件来源于 **欧易词典**（Eudic / 欧路词典）导出的生词本。
+- **后端**：Flask + SQLAlchemy + gTTS + Gunicorn
+- **前端**：React + TypeScript + Tailwind CSS + Zustand
+- **部署**：Docker 多阶段构建，支持 Docker Compose / Portainer
 
-### 导出步骤（欧易词典）
+---
 
-1. 打开 **欧路词典** 或 **每日英语听力** App
-2. 进入 **生词本** → 选择要导出的生词本
-3. 点击右上角 **更多** → **导出** → 选择 **CSV 格式**
-4. 将导出的 CSV 文件保存到电脑
+## 🚀 快速部署
 
-### CSV 格式要求
-
-CSV 文件需包含以下列（忽略大小写）：
-
-| 列名 | 必填 | 说明 |
-|------|------|------|
-| `word` | ✅ | 单词 |
-| `meaning` | ✅ | 释义（支持 HTML 格式） |
-| `phonetic` | ❌ | 音标（如 `/hɛˈloʊ/`） |
-| `language` | ❌ | 语言 `en` 或 `zh`（默认 `en`） |
-| `example` | ❌ | 例句 |
-
-### 导入步骤
-
-1. 打开应用 → 点击左上角 **⚙ 齿轮按钮**
-2. 在下拉菜单中选择 **↓ 导入CSV**
-3. 选择准备好的 CSV 文件
-4. 导入完成后，词库面板自动刷新
-
-### 导出步骤
-
-1. 点击右上角 **↑ 导出CSV** 按钮
-2. 选择 **导出为CSV** 或 **导出为PDF**
-3. 文件将自动下载到本地
-
-## 🐳 Docker 部署
-
-### 构建镜像
+### 1. 创建持久化目录
 
 ```bash
-git clone https://github.com/iHub-2020/PTE-Word-Practice.git
-cd PTE-Word-Practice
-docker build -t pte-word-practice:latest .
-```
-
-### 创建持久化目录
-
-部署前需要在宿主机上创建数据持久化目录，并设置正确的权限（容器内以 UID 1000 运行）：
-
-```bash
-# 创建所有持久化目录
-sudo mkdir -p /opt/pte-word-practice/{data,static/audio,uploads/music,exports,logs}
-
-# 设置目录所有者为 UID 1000（与容器内用户一致）
+sudo mkdir -p /opt/pte-word-practice/{data,cache,uploads/music,exports,logs}
 sudo chown -R 1000:1000 /opt/pte-word-practice
-
-# 设置目录权限为 775（所有者和组可读写执行，其他人可读可执行）
 sudo chmod -R 775 /opt/pte-word-practice
 ```
 
-### 快速启动
+> UID 1000 对应容器内的非 root 用户。
+
+### 2. 构建镜像
+
+```bash
+docker build -t pte-word-practice:latest .
+```
+
+### 3. 启动容器
+
+**Docker Compose（推荐）：**
+
+```bash
+docker-compose up -d
+```
+
+**或手动运行：**
 
 ```bash
 docker run -d \
   --name pte-word-practice \
   -p 8300:5000 \
   -v /opt/pte-word-practice/data:/app/data \
-  -v /opt/pte-word-practice/static/audio:/app/static/audio \
+  -v /opt/pte-word-practice/cache:/app/cache \
   -v /opt/pte-word-practice/uploads:/app/uploads \
   -v /opt/pte-word-practice/uploads/music:/app/uploads/music \
   -v /opt/pte-word-practice/exports:/app/exports \
   -v /opt/pte-word-practice/logs:/app/logs \
   -e TZ=Asia/Shanghai \
+  --restart unless-stopped \
   pte-word-practice:latest
 ```
 
-### Portainer Stack 部署
+**Portainer Stack：** 使用 `portainer-stack.yml` 部署。
 
-使用项目中的 `portainer-stack.yml` 文件：
+### 4. 访问
 
-1. 登录 Portainer → **Stacks** → **Add stack**
-2. 选择 **Upload** 或粘贴 `portainer-stack.yml` 内容
-3. 修改必要的环境变量（如 `SECRET_KEY`）
-4. 点击 **Deploy the stack**
+浏览器打开 **http://your-host:8300**
 
-### HTTPS 配置（可选）
+---
 
-本应用支持通过 **Nginx 反向代理** 或 **Nginx Proxy Manager** 配置 HTTPS：
+## 📁 持久化目录说明
 
-1. 将 SSL 证书放置到 `/opt/ssl/certs/` 和 `/opt/ssl/private/`
-2. 取消 `portainer-stack.yml` 中 SSL 挂载的注释
-3. 配置 Nginx 反向代理将 443 → 8300
+| 容器路径 | 宿主机路径 | 用途 |
+|---------|-----------|------|
+| `/app/data` | `/opt/pte-word-practice/data` | SQLite 数据库 |
+| `/app/cache` | `/opt/pte-word-practice/cache` | TTS 音频缓存（自动生成） |
+| `/app/uploads` | `/opt/pte-word-practice/uploads` | CSV 导入文件 |
+| `/app/uploads/music` | `/opt/pte-word-practice/uploads/music` | 自定义背景音乐 |
+| `/app/exports` | `/opt/pte-word-practice/exports` | 导出文件 |
+| `/app/logs` | `/opt/pte-word-practice/logs` | 应用日志 |
 
-## ⚙ 环境变量
+---
 
-| 变量名 | 默认值 | 说明 |
-|--------|--------|------|
-| `SECRET_KEY` | `dev-secret-key...` | Flask 密钥（**生产环境必须更改**） |
-| `FLASK_ENV` | `production` | 运行环境 |
-| `DATABASE_URL` | `sqlite:///data/words.db` | 数据库连接 |
+## 🔧 环境变量
+
+| 变量 | 默认值 | 说明 |
+|------|--------|------|
+| `SECRET_KEY` | `dev-secret-key...` | Flask 密钥（生产环境必须修改） |
+| `DATABASE_URL` | `sqlite:////app/data/words.db` | 数据库连接字符串 |
 | `LOG_LEVEL` | `INFO` | 日志级别 |
-| `TZ` | `Asia/Shanghai` | 时区 |
-| `HTTP_PROXY` | — | 代理地址（gTTS 需要访问 Google） |
-| `HTTPS_PROXY` | — | HTTPS 代理地址 |
+| `TZ` | — | 时区（建议 `Asia/Shanghai`） |
+| `HTTP_PROXY` / `HTTPS_PROXY` | — | 代理配置（gTTS 需要访问 Google API） |
 
-## 📁 目录结构
+---
 
-```
-PTE-Word-Practice/
-├── app.py                 # Flask 应用入口
-├── config.py              # 应用配置
-├── models.py              # 数据模型 (Word)
-├── extensions.py          # Flask 扩展 (SQLAlchemy)
-├── routes/
-│   └── api.py             # API 路由
-├── services/
-│   ├── word_service.py    # 单词 CRUD 服务
-│   ├── audio_service.py   # 音频生成服务 (gTTS)
-│   └── export_service.py  # 导入导出服务
-├── frontend/
-│   ├── src/
-│   │   ├── components/    # React 组件
-│   │   ├── store/         # Zustand 状态管理
-│   │   ├── services/      # API 客户端
-│   │   └── types/         # TypeScript 类型
-│   └── dist/              # 构建产物
-├── Dockerfile             # 多阶段构建
-├── portainer-stack.yml    # Portainer Stack 配置
-└── requirements.txt       # Python 依赖
-```
+## 📡 API 端点
 
-## 🔧 本地开发
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/words` | 获取单词列表 |
+| POST | `/api/words` | 添加单词 |
+| PUT | `/api/words/:id` | 更新单词 |
+| DELETE | `/api/words/:id` | 删除单词 |
+| POST | `/api/words/:id/review` | 标记已复习 |
+| GET | `/api/words/:id/audio` | 获取单词发音 |
+| GET | `/api/words/:id/meaning-audio` | 获取含义音频 |
+| POST | `/api/tts` | 通用 TTS |
+| POST | `/api/import` | 导入 CSV |
+| POST | `/api/export` | 导出 CSV |
+| POST | `/api/music/upload` | 上传背景音乐 |
+| GET | `/api/music/list` | 获取音乐列表 |
+| GET | `/api/cache/info` | 缓存信息 |
+| DELETE | `/api/cache/clear` | 清空缓存 |
+| GET | `/health` | 健康检查 |
 
-### 后端
-
-```bash
-pip install -r requirements.txt
-python app.py
-```
-
-### 前端
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-前端开发服务器默认运行在 `http://localhost:5173`，API 代理到 `http://localhost:5000`。
+---
 
 ## 📄 License
 

@@ -16,7 +16,7 @@ frontend/.vite/
 
 # Data & Runtime (volume-mounted in Docker)
 data/
-static/audio/
+cache/
 uploads/
 exports/
 logs/
